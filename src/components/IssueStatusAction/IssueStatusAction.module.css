@@ -1,0 +1,55 @@
+.action {
+  display: grid;
+  gap: 10px;
+}
+
+.buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.button {
+  width: 100%;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  padding: 10px 14px;
+  font-weight: 700;
+}
+
+.primary {
+  color: white;
+  background: #4f46e5;
+}
+
+.primary:hover:not(:disabled) {
+  background: #4338ca;
+}
+
+.secondary {
+  border-color: #d0d5dd;
+  color: #344054;
+  background: white;
+}
+
+.secondary:hover:not(:disabled) {
+  background: #f9fafb;
+}
+
+.button:disabled {
+  cursor: wait;
+  opacity: 0.65;
+}
+
+.error {
+  margin: 0;
+  color: #b42318;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+@media (max-width: 420px) {
+  .buttons {
+    grid-template-columns: 1fr;
+  }
+}

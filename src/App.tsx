@@ -74,6 +74,7 @@ export function App() {
       <IssueDetailsPanel
         issueId={selectedIssueId}
         onClose={() => setSelectedIssueId(null)}
+        onStatusUpdated={reload}
       />
     </PageShell>
   );

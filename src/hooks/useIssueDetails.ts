@@ -7,6 +7,7 @@ interface UseIssueDetailsResult {
   loading: boolean;
   error: string | null;
   reload: () => void;
+  replaceIssue: (issue: Issue) => void;
 }
 
 export function useIssueDetails(
@@ -60,5 +61,9 @@ export function useIssueDetails(
     loading,
     error,
     reload: () => setReloadVersion((version) => version + 1),
+    replaceIssue: (updatedIssue) =>
+      setIssue((currentIssue) =>
+        currentIssue?.id === updatedIssue.id ? updatedIssue : currentIssue,
+      ),
   };
 }
