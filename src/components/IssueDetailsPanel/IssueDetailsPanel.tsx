@@ -1,11 +1,12 @@
-import { useEffect, useState } from 'react';
-import { getIssue } from '../../api/issuesApi';
-import type { Issue } from '../../types/issue';
-import { ErrorState } from '../ErrorState/ErrorState';
-import { SidePanel } from '../SidePanel/SidePanel';
-import { Spinner } from '../Spinner/Spinner';
-import { StatusBadge } from '../StatusBadge/StatusBadge';
-import styles from './IssueDetailsPanel.module.css';
+import { useEffect, useState } from "react";
+import type { PropsWithChildren } from "react";
+import { getIssue } from "../../api/issuesApi";
+import type { Issue } from "../../types/issue";
+import { ErrorState } from "../ErrorState/ErrorState";
+import { SidePanel } from "../SidePanel/SidePanel";
+import { Spinner } from "../Spinner/Spinner";
+import { StatusBadge } from "../StatusBadge/StatusBadge";
+import styles from "./IssueDetailsPanel.module.css";
 
 interface IssueDetailsPanelProps {
   issueId: string | null;
@@ -43,7 +44,7 @@ export function IssueDetailsPanel({
       .catch((requestError: unknown) => {
         if (
           requestError instanceof DOMException &&
-          requestError.name === 'AbortError'
+          requestError.name === "AbortError"
         ) {
           return;
         }
@@ -51,7 +52,7 @@ export function IssueDetailsPanel({
         setError(
           requestError instanceof Error
             ? requestError.message
-            : 'Could not load issue details',
+            : "Could not load issue details",
         );
         setLoading(false);
       });
@@ -79,28 +80,47 @@ export function IssueDetailsPanel({
 
           <p className={styles.description}>{issue.description}</p>
 
-          <dl className={styles.metadata}>
-            <div>
-              <dt>Assignee</dt>
-              <dd>{issue.assignee}</dd>
-            </div>
-            <div>
-              <dt>Floor</dt>
-              <dd>{issue.floor}</dd>
-            </div>
-            <div>
-              <dt>Severity</dt>
-              <dd className={styles.capitalize}>{issue.severity}</dd>
-            </div>
-            <div>
-              <dt>Status</dt>
-              <dd>
-                <StatusBadge status={issue.status} />
-              </dd>
-            </div>
-          </dl>
+          <IssueMetadata issue={issue} />
         </article>
       ) : null}
     </SidePanel>
+  );
+}
+
+function IssueMetadata({ issue }: { issue: Issue }) {
+  const fields = [
+    { label: "Assignee", value: issue.assignee },
+    { label: "Floor", value: issue.floor },
+    {
+      label: "Severity",
+      value: <span className={styles.capitalize}>{issue.severity}</span>,
+    },
+    {
+      label: "Status",
+      value: <StatusBadge status={issue.status} />,
+    },
+  ];
+
+  return (
+    <dl className={styles.metadata}>
+      {fields.map(({ label, value }) => (
+        <DetailField key={label} label={label}>
+          {value}
+        </DetailField>
+      ))}
+    </dl>
+  );
+}
+
+interface DetailFieldProps extends PropsWithChildren {
+  label: string;
+}
+
+function DetailField({ label, children }: DetailFieldProps) {
+  return (
+    <div>
+      <dt>{label}</dt>
+      <dd>{children}</dd>
+    </div>
   );
 }
