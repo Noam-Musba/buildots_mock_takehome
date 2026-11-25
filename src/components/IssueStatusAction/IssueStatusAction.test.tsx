@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react';
+import { act, cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { updateIssueStatus } from '../../api/issuesApi';
@@ -86,11 +86,12 @@ describe('IssueStatusAction', () => {
 
   it('shows an error and leaves the action available after a failure', async () => {
     const user = userEvent.setup();
+    const onUpdated = vi.fn();
 
     updateIssueStatusMock.mockRejectedValue(new Error('Temporary network error'));
 
     render(
-      <IssueStatusAction issue={seedIssues[0]} onUpdated={vi.fn()} />,
+      <IssueStatusAction issue={seedIssues[0]} onUpdated={onUpdated} />,
     );
 
     await user.click(screen.getByRole('button', { name: 'Mark as resolved' }));
@@ -101,5 +102,33 @@ describe('IssueStatusAction', () => {
     expect(
       screen.getByRole('button', { name: 'Mark as resolved' }),
     ).toBeEnabled();
+    expect(onUpdated).not.toHaveBeenCalled();
+  });
+
+  it('disables every action while a status update is pending', async () => {
+    const user = userEvent.setup();
+    let resolveUpdate!: (issue: typeof seedIssues[0]) => void;
+    const pendingUpdate = new Promise<typeof seedIssues[0]>((resolve) => {
+      resolveUpdate = resolve;
+    });
+
+    updateIssueStatusMock.mockReturnValue(pendingUpdate);
+
+    render(
+      <IssueStatusAction issue={seedIssues[0]} onUpdated={vi.fn()} />,
+    );
+
+    await user.click(
+      screen.getByRole('button', { name: 'Mark as resolved' }),
+    );
+
+    expect(
+      screen.getByRole('button', { name: 'Updating status...' }),
+    ).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Mark as in progress' }),
+    ).toBeDisabled();
+
+    await act(async () => resolveUpdate(seedIssues[0]));
   });
 });
