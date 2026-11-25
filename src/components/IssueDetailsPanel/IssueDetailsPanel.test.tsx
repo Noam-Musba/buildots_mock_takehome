@@ -7,6 +7,7 @@ import { IssueDetailsPanel } from './IssueDetailsPanel';
 
 vi.mock('../../api/issuesApi', () => ({
   getIssue: vi.fn(),
+  updateIssueStatus: vi.fn(),
 }));
 
 const getIssueMock = vi.mocked(getIssue);
@@ -22,7 +23,11 @@ describe('IssueDetailsPanel', () => {
     getIssueMock.mockResolvedValue(seedIssues[0]);
 
     render(
-      <IssueDetailsPanel issueId="OBS-1042" onClose={vi.fn()} />,
+      <IssueDetailsPanel
+        issueId="OBS-1042"
+        onClose={vi.fn()}
+        onStatusUpdated={vi.fn()}
+      />,
     );
 
     expect(screen.getByRole('status')).toHaveTextContent(
@@ -52,7 +57,11 @@ describe('IssueDetailsPanel', () => {
       .mockResolvedValueOnce(seedIssues[0]);
 
     render(
-      <IssueDetailsPanel issueId="OBS-1042" onClose={vi.fn()} />,
+      <IssueDetailsPanel
+        issueId="OBS-1042"
+        onClose={vi.fn()}
+        onStatusUpdated={vi.fn()}
+      />,
     );
 
     expect(await screen.findByRole('alert')).toHaveTextContent(

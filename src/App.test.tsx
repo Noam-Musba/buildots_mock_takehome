@@ -7,17 +7,19 @@ import {
   within,
 } from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { getIssue, listIssues } from './api/issuesApi';
+import { getIssue, listIssues, updateIssueStatus } from './api/issuesApi';
 import { App } from './App';
 import { seedIssues } from './data/issues';
 
 vi.mock('./api/issuesApi', () => ({
   getIssue: vi.fn(),
   listIssues: vi.fn(),
+  updateIssueStatus: vi.fn(),
 }));
 
 const getIssueMock = vi.mocked(getIssue);
 const listIssuesMock = vi.mocked(listIssues);
+const updateIssueStatusMock = vi.mocked(updateIssueStatus);
 
 beforeEach(() => {
   vi.useFakeTimers();
@@ -26,6 +28,10 @@ beforeEach(() => {
     total: seedIssues.length,
   });
   getIssueMock.mockResolvedValue(seedIssues[0]);
+  updateIssueStatusMock.mockResolvedValue({
+    ...seedIssues[0],
+    status: 'resolved',
+  });
 });
 
 afterEach(() => {
@@ -109,5 +115,43 @@ describe('App issue details', () => {
       'OBS-1042',
       expect.any(AbortSignal),
     );
+  });
+
+  it('keeps the panel and list consistent after a status update', async () => {
+    const resolvedIssue = { ...seedIssues[0], status: 'resolved' as const };
+
+    listIssuesMock
+      .mockResolvedValueOnce({
+        items: seedIssues,
+        total: seedIssues.length,
+      })
+      .mockResolvedValue({
+        items: [resolvedIssue, ...seedIssues.slice(1)],
+        total: seedIssues.length,
+      });
+    updateIssueStatusMock.mockResolvedValue(resolvedIssue);
+
+    render(<App />);
+    await act(async () => undefined);
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'View' })[0]);
+    await act(async () => undefined);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Mark as resolved' }));
+    await act(async () => undefined);
+
+    const dialog = screen.getByRole('dialog', { name: 'Issue details' });
+    const issueRow = within(screen.getByRole('table'))
+      .getByText('OBS-1042')
+      .closest('tr');
+
+    expect(updateIssueStatusMock).toHaveBeenCalledWith(
+      'OBS-1042',
+      'resolved',
+    );
+    expect(within(dialog).getByText('Resolved')).toBeInTheDocument();
+    expect(issueRow).not.toBeNull();
+    expect(within(issueRow!).getByText('Resolved')).toBeInTheDocument();
+    expect(listIssuesMock).toHaveBeenCalledTimes(2);
   });
 });

@@ -1,25 +1,43 @@
-import type { PropsWithChildren } from "react";
-import { useIssueDetails } from "../../hooks/useIssueDetails";
-import type { Issue } from "../../types/issue";
-import { ErrorState } from "../ErrorState/ErrorState";
-import { SidePanel } from "../SidePanel/SidePanel";
-import { Spinner } from "../Spinner/Spinner";
-import { StatusBadge } from "../StatusBadge/StatusBadge";
-import styles from "./IssueDetailsPanel.module.css";
+import type { PropsWithChildren } from 'react';
+import { useIssueDetails } from '../../hooks/useIssueDetails';
+import type { Issue } from '../../types/issue';
+import { ErrorState } from '../ErrorState/ErrorState';
+import { IssueStatusAction } from '../IssueStatusAction/IssueStatusAction';
+import { SidePanel } from '../SidePanel/SidePanel';
+import { Spinner } from '../Spinner/Spinner';
+import { StatusBadge } from '../StatusBadge/StatusBadge';
+import styles from './IssueDetailsPanel.module.css';
 
 interface IssueDetailsPanelProps {
   issueId: string | null;
   onClose: () => void;
+  onStatusUpdated: () => void;
 }
 
 export function IssueDetailsPanel({
   issueId,
   onClose,
+  onStatusUpdated,
 }: IssueDetailsPanelProps) {
-  const { issue, loading, error, reload } = useIssueDetails(issueId);
+  const { issue, loading, error, reload, replaceIssue } =
+    useIssueDetails(issueId);
+
+  const handleIssueUpdated = (updatedIssue: Issue) => {
+    replaceIssue(updatedIssue);
+    onStatusUpdated();
+  };
 
   return (
-    <SidePanel open={issueId !== null} title="Issue details" onClose={onClose}>
+    <SidePanel
+      open={issueId !== null}
+      title="Issue details"
+      onClose={onClose}
+      footer={
+        issue ? (
+          <IssueStatusAction issue={issue} onUpdated={handleIssueUpdated} />
+        ) : undefined
+      }
+    >
       {loading ? <Spinner label="Loading issue details..." /> : null}
 
       {!loading && error ? (
@@ -54,14 +72,14 @@ function IssueSummary({ issue }: { issue: Issue }) {
 function IssueMetadata({ issue }: { issue: Issue }) {
   const { assignee, floor, severity, status } = issue;
   const fields = [
-    { label: "Assignee", value: assignee },
-    { label: "Floor", value: floor },
+    { label: 'Assignee', value: assignee },
+    { label: 'Floor', value: floor },
     {
-      label: "Severity",
+      label: 'Severity',
       value: <span className={styles.capitalize}>{severity}</span>,
     },
     {
-      label: "Status",
+      label: 'Status',
       value: <StatusBadge status={status} />,
     },
   ];
