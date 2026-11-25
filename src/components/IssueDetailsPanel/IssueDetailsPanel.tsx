@@ -1,6 +1,5 @@
-import { useEffect, useState } from "react";
 import type { PropsWithChildren } from "react";
-import { getIssue } from "../../api/issuesApi";
+import { useIssueDetails } from "../../hooks/useIssueDetails";
 import type { Issue } from "../../types/issue";
 import { ErrorState } from "../ErrorState/ErrorState";
 import { SidePanel } from "../SidePanel/SidePanel";
@@ -17,58 +16,14 @@ export function IssueDetailsPanel({
   issueId,
   onClose,
 }: IssueDetailsPanelProps) {
-  const [issue, setIssue] = useState<Issue | null>(null);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [reloadVersion, setReloadVersion] = useState(0);
-
-  useEffect(() => {
-    if (!issueId) {
-      setIssue(null);
-      setLoading(false);
-      setError(null);
-      return;
-    }
-
-    const controller = new AbortController();
-
-    setIssue(null);
-    setLoading(true);
-    setError(null);
-
-    getIssue(issueId, controller.signal)
-      .then((result) => {
-        setIssue(result);
-        setLoading(false);
-      })
-      .catch((requestError: unknown) => {
-        if (
-          requestError instanceof DOMException &&
-          requestError.name === "AbortError"
-        ) {
-          return;
-        }
-
-        setError(
-          requestError instanceof Error
-            ? requestError.message
-            : "Could not load issue details",
-        );
-        setLoading(false);
-      });
-
-    return () => controller.abort();
-  }, [issueId, reloadVersion]);
+  const { issue, loading, error, reload } = useIssueDetails(issueId);
 
   return (
     <SidePanel open={issueId !== null} title="Issue details" onClose={onClose}>
       {loading ? <Spinner label="Loading issue details..." /> : null}
 
       {!loading && error ? (
-        <ErrorState
-          message={error}
-          onRetry={() => setReloadVersion((version) => version + 1)}
-        />
+        <ErrorState message={error} onRetry={reload} />
       ) : null}
 
       {!loading && !error && issue ? (
