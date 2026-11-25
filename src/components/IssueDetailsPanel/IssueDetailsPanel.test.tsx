@@ -75,4 +75,34 @@ describe('IssueDetailsPanel', () => {
     ).toBeInTheDocument();
     expect(getIssueMock).toHaveBeenCalledTimes(2);
   });
+
+  it('aborts the previous detail request when the selection changes', async () => {
+    getIssueMock
+      .mockImplementationOnce(() => new Promise(() => undefined))
+      .mockResolvedValueOnce(seedIssues[1]);
+
+    const { rerender } = render(
+      <IssueDetailsPanel
+        issueId="OBS-1042"
+        onClose={vi.fn()}
+        onStatusUpdated={vi.fn()}
+      />,
+    );
+    const initialSignal = getIssueMock.mock.calls[0][1];
+
+    rerender(
+      <IssueDetailsPanel
+        issueId="OBS-1039"
+        onClose={vi.fn()}
+        onStatusUpdated={vi.fn()}
+      />,
+    );
+
+    expect(initialSignal?.aborted).toBe(true);
+    expect(await screen.findByText('Ceiling grid alignment')).toBeInTheDocument();
+    expect(getIssueMock).toHaveBeenLastCalledWith(
+      'OBS-1039',
+      expect.any(AbortSignal),
+    );
+  });
 });

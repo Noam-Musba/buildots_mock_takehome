@@ -95,6 +95,18 @@ describe('App issue queries', () => {
       expect.any(AbortSignal),
     );
   });
+
+  it('aborts the previous list request when the query changes', () => {
+    render(<App />);
+
+    const initialSignal = listIssuesMock.mock.calls[0][1];
+
+    fireEvent.change(screen.getByRole('combobox', { name: 'Status' }), {
+      target: { value: 'resolved' },
+    });
+
+    expect(initialSignal?.aborted).toBe(true);
+  });
 });
 
 describe('App issue details', () => {
@@ -115,6 +127,24 @@ describe('App issue details', () => {
       'OBS-1042',
       expect.any(AbortSignal),
     );
+  });
+
+  it('keeps the issue list available when the detail request fails', async () => {
+    getIssueMock.mockRejectedValue(new Error('Temporary network error'));
+
+    render(<App />);
+    await act(async () => undefined);
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'View' })[0]);
+    await act(async () => undefined);
+
+    const dialog = screen.getByRole('dialog', { name: 'Issue details' });
+
+    expect(within(dialog).getByRole('alert')).toHaveTextContent(
+      'Temporary network error',
+    );
+    expect(screen.getByRole('table')).toBeVisible();
+    expect(screen.getByText('OBS-1042')).toBeInTheDocument();
   });
 
   it('keeps the panel and list consistent after a status update', async () => {
