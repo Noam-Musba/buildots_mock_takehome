@@ -2,6 +2,7 @@ import { useState } from 'react';
 import styles from './App.module.css';
 import { EmptyState } from './components/EmptyState/EmptyState';
 import { ErrorState } from './components/ErrorState/ErrorState';
+import { IssueDetailsPanel } from './components/IssueDetailsPanel/IssueDetailsPanel';
 import { IssueFilters } from './components/IssueFilters/IssueFilters';
 import { IssueTable } from './components/IssueTable/IssueTable';
 import { PageShell } from './components/PageShell/PageShell';
@@ -14,6 +15,7 @@ export function App() {
   const [status, setStatus] = useState<IssueStatus | 'all'>('all');
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<IssueSort>('newest');
+  const [selectedIssueId, setSelectedIssueId] = useState<string | null>(null);
   const debouncedSearch = useDebouncedValue(search, 300);
   const { issues, loading, error, reload } = useIssues({
     search: debouncedSearch,
@@ -61,10 +63,18 @@ export function App() {
           ) : null}
 
           {!loading && !error && issues.length > 0 ? (
-            <IssueTable issues={issues} />
+            <IssueTable
+              issues={issues}
+              onSelectIssue={setSelectedIssueId}
+            />
           ) : null}
         </div>
       </section>
+
+      <IssueDetailsPanel
+        issueId={selectedIssueId}
+        onClose={() => setSelectedIssueId(null)}
+      />
     </PageShell>
   );
 }

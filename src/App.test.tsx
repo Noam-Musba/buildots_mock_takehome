@@ -1,13 +1,22 @@
-import { act, cleanup, fireEvent, render, screen } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from '@testing-library/react';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { listIssues } from './api/issuesApi';
+import { getIssue, listIssues } from './api/issuesApi';
 import { App } from './App';
 import { seedIssues } from './data/issues';
 
 vi.mock('./api/issuesApi', () => ({
+  getIssue: vi.fn(),
   listIssues: vi.fn(),
 }));
 
+const getIssueMock = vi.mocked(getIssue);
 const listIssuesMock = vi.mocked(listIssues);
 
 beforeEach(() => {
@@ -16,6 +25,7 @@ beforeEach(() => {
     items: seedIssues,
     total: seedIssues.length,
   });
+  getIssueMock.mockResolvedValue(seedIssues[0]);
 });
 
 afterEach(() => {
@@ -76,6 +86,27 @@ describe('App issue queries', () => {
 
     expect(listIssuesMock).toHaveBeenLastCalledWith(
       { search: '', sort: 'oldest', status: 'all' },
+      expect.any(AbortSignal),
+    );
+  });
+});
+
+describe('App issue details', () => {
+  it('opens the selected issue in the details panel', async () => {
+    render(<App />);
+    await act(async () => undefined);
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'View' })[0]);
+    await act(async () => undefined);
+
+    const dialog = screen.getByRole('dialog', { name: 'Issue details' });
+
+    expect(dialog).toBeVisible();
+    expect(
+      within(dialog).getByText('Missing firestop around cable tray'),
+    ).toBeInTheDocument();
+    expect(getIssueMock).toHaveBeenCalledWith(
+      'OBS-1042',
       expect.any(AbortSignal),
     );
   });
