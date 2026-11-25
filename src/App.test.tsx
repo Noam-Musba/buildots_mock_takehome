@@ -147,6 +147,29 @@ describe('App issue details', () => {
     expect(screen.getByText('OBS-1042')).toBeInTheDocument();
   });
 
+  it('aborts a pending detail request when the panel closes', async () => {
+    getIssueMock.mockImplementation(() => new Promise(() => undefined));
+
+    render(<App />);
+    await act(async () => undefined);
+
+    fireEvent.click(screen.getAllByRole('button', { name: 'View' })[0]);
+
+    const detailSignal = getIssueMock.mock.calls[0][1];
+
+    expect(screen.getByRole('status')).toHaveTextContent(
+      'Loading issue details...',
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Close panel' }));
+
+    expect(detailSignal?.aborted).toBe(true);
+    expect(
+      screen.queryByRole('dialog', { name: 'Issue details' }),
+    ).not.toBeInTheDocument();
+    expect(screen.getByRole('table')).toBeVisible();
+  });
+
   it('keeps the panel and list consistent after a status update', async () => {
     const resolvedIssue = { ...seedIssues[0], status: 'resolved' as const };
 
@@ -183,5 +206,47 @@ describe('App issue details', () => {
     expect(issueRow).not.toBeNull();
     expect(within(issueRow!).getByText('Resolved')).toBeInTheDocument();
     expect(listIssuesMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('removes a resolved issue from the open filter after updating', async () => {
+    const resolvedIssue = { ...seedIssues[0], status: 'resolved' as const };
+
+    listIssuesMock
+      .mockResolvedValueOnce({
+        items: seedIssues,
+        total: seedIssues.length,
+      })
+      .mockResolvedValueOnce({ items: [seedIssues[0]], total: 1 })
+      .mockResolvedValueOnce({ items: [], total: 0 });
+    updateIssueStatusMock.mockResolvedValue(resolvedIssue);
+
+    render(<App />);
+    await act(async () => undefined);
+
+    fireEvent.change(screen.getByRole('combobox', { name: 'Status' }), {
+      target: { value: 'open' },
+    });
+    await act(async () => undefined);
+
+    expect(screen.getByText('1 issue')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('button', { name: 'View' }));
+    await act(async () => undefined);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Mark as resolved' }));
+    await act(async () => undefined);
+
+    const dialog = screen.getByRole('dialog', { name: 'Issue details' });
+
+    expect(within(dialog).getByText('Resolved')).toBeInTheDocument();
+    expect(screen.queryByRole('table')).not.toBeInTheDocument();
+    expect(
+      screen.getByText('No observations match these filters.'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('0 issues')).toBeInTheDocument();
+    expect(listIssuesMock).toHaveBeenLastCalledWith(
+      { search: '', sort: 'newest', status: 'open' },
+      expect.any(AbortSignal),
+    );
   });
 });
