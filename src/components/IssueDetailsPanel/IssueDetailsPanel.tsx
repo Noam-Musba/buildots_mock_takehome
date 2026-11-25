@@ -73,13 +73,7 @@ export function IssueDetailsPanel({
 
       {!loading && !error && issue ? (
         <article className={styles.details}>
-          <div className={styles.heading}>
-            <p className={styles.issueId}>{issue.id}</p>
-            <h3>{issue.title}</h3>
-          </div>
-
-          <p className={styles.description}>{issue.description}</p>
-
+          <IssueSummary issue={issue} />
           <IssueMetadata issue={issue} />
         </article>
       ) : null}
@@ -87,17 +81,33 @@ export function IssueDetailsPanel({
   );
 }
 
+function IssueSummary({ issue }: { issue: Issue }) {
+  const { id, title, description } = issue;
+
+  return (
+    <>
+      <div className={styles.heading}>
+        <p className={styles.issueId}>{id}</p>
+        <h3>{title}</h3>
+      </div>
+
+      <p className={styles.description}>{description}</p>
+    </>
+  );
+}
+
 function IssueMetadata({ issue }: { issue: Issue }) {
+  const { assignee, floor, severity, status } = issue;
   const fields = [
-    { label: "Assignee", value: issue.assignee },
-    { label: "Floor", value: issue.floor },
+    { label: "Assignee", value: assignee },
+    { label: "Floor", value: floor },
     {
       label: "Severity",
-      value: <span className={styles.capitalize}>{issue.severity}</span>,
+      value: <span className={styles.capitalize}>{severity}</span>,
     },
     {
       label: "Status",
-      value: <StatusBadge status={issue.status} />,
+      value: <StatusBadge status={status} />,
     },
   ];
 
