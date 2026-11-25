@@ -2,15 +2,24 @@ import { useState } from 'react';
 import styles from './App.module.css';
 import { EmptyState } from './components/EmptyState/EmptyState';
 import { ErrorState } from './components/ErrorState/ErrorState';
+import { IssueFilters } from './components/IssueFilters/IssueFilters';
 import { IssueTable } from './components/IssueTable/IssueTable';
 import { PageShell } from './components/PageShell/PageShell';
 import { Spinner } from './components/Spinner/Spinner';
+import { useDebouncedValue } from './hooks/useDebouncedValue';
 import { useIssues } from './hooks/useIssues';
-import type { IssueStatus } from './types/issue';
+import type { IssueSort, IssueStatus } from './types/issue';
 
 export function App() {
   const [status, setStatus] = useState<IssueStatus | 'all'>('all');
-  const { issues, loading, error, reload } = useIssues(status);
+  const [search, setSearch] = useState('');
+  const [sort, setSort] = useState<IssueSort>('newest');
+  const debouncedSearch = useDebouncedValue(search, 300);
+  const { issues, loading, error, reload } = useIssues({
+    search: debouncedSearch,
+    sort,
+    status,
+  });
 
   return (
     <PageShell
@@ -24,20 +33,14 @@ export function App() {
     >
       <section className={styles.card}>
         <div className={styles.toolbar}>
-          <label>
-            <span>Status</span>
-            <select
-              value={status}
-              onChange={(event) =>
-                setStatus(event.target.value as IssueStatus | 'all')
-              }
-            >
-              <option value="all">All</option>
-              <option value="open">Open</option>
-              <option value="in_progress">In progress</option>
-              <option value="resolved">Resolved</option>
-            </select>
-          </label>
+          <IssueFilters
+            search={search}
+            sort={sort}
+            status={status}
+            onSearchChange={setSearch}
+            onSortChange={setSort}
+            onStatusChange={setStatus}
+          />
 
           {!loading && !error ? (
             <span className={styles.count}>
@@ -54,7 +57,7 @@ export function App() {
           ) : null}
 
           {!loading && !error && issues.length === 0 ? (
-            <EmptyState>No observations match this status.</EmptyState>
+            <EmptyState>No observations match these filters.</EmptyState>
           ) : null}
 
           {!loading && !error && issues.length > 0 ? (
