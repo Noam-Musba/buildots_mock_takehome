@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { listIssues } from '../api/issuesApi';
-import type { Issue, IssueStatus } from '../types/issue';
+import type { Issue, IssueQuery } from '../types/issue';
 
 interface UseIssuesResult {
   issues: Issue[];
@@ -9,7 +9,8 @@ interface UseIssuesResult {
   reload: () => void;
 }
 
-export function useIssues(status: IssueStatus | 'all'): UseIssuesResult {
+export function useIssues(query: IssueQuery = {}): UseIssuesResult {
+  const { search = '', sort = 'newest', status = 'all' } = query;
   const [issues, setIssues] = useState<Issue[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -21,7 +22,7 @@ export function useIssues(status: IssueStatus | 'all'): UseIssuesResult {
     setLoading(true);
     setError(null);
 
-    listIssues({ status }, controller.signal)
+    listIssues({ search, sort, status }, controller.signal)
       .then((result) => {
         setIssues(result.items);
         setLoading(false);
@@ -43,7 +44,7 @@ export function useIssues(status: IssueStatus | 'all'): UseIssuesResult {
       });
 
     return () => controller.abort();
-  }, [status, reloadVersion]);
+  }, [search, sort, status, reloadVersion]);
 
   return {
     issues,
