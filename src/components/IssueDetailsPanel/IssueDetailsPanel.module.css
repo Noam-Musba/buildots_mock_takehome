@@ -1,0 +1,59 @@
+.details {
+  display: grid;
+  gap: 24px;
+}
+
+.heading h3 {
+  margin: 4px 0 0;
+  color: #1f2937;
+  font-size: 1.35rem;
+  line-height: 1.35;
+}
+
+.issueId {
+  margin: 0;
+  color: #667085;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.description {
+  margin: 0;
+  color: #475467;
+  line-height: 1.6;
+}
+
+.metadata {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 16px;
+  margin: 0;
+}
+
+.metadata div {
+  min-width: 0;
+}
+
+.metadata dt {
+  margin-bottom: 6px;
+  color: #667085;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.metadata dd {
+  margin: 0;
+  color: #1f2937;
+  overflow-wrap: anywhere;
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+@media (max-width: 420px) {
+  .metadata {
+    grid-template-columns: 1fr;
+  }
+}
