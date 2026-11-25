@@ -34,4 +34,15 @@
   .filters select {
     width: 100%;
   }
+
+  .filters label {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .filters input,
+  .filters select {
+    min-width: 0;
+  }
 }
