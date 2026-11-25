@@ -1,7 +1,10 @@
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { seedIssues } from '../../data/issues';
 import { IssueTable } from './IssueTable';
+
+afterEach(cleanup);
 
 describe('IssueTable', () => {
   it('renders issue information', () => {
