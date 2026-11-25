@@ -1,0 +1,21 @@
+.wrapper {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #667085;
+}
+
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #d7dbea;
+  border-top-color: #5965d8;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

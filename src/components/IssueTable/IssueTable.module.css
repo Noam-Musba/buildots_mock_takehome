@@ -1,0 +1,59 @@
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  padding: 15px 18px;
+  border-bottom: 1px solid #eceef3;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.table th {
+  color: #667085;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: #f9fafb;
+}
+
+.table tbody tr:hover {
+  background: #fafbff;
+}
+
+.issueTitle {
+  font-weight: 700;
+  color: #1f2937;
+}
+
+.issueId {
+  margin-top: 4px;
+  color: #98a2b3;
+  font-size: 0.78rem;
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+.viewButton {
+  border: 0;
+  color: #4f46e5;
+  background: transparent;
+  font-weight: 700;
+}
+
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}

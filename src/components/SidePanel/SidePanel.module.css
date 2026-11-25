@@ -1,0 +1,52 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  justify-content: flex-end;
+  background: rgb(15 23 42 / 34%);
+  z-index: 100;
+}
+
+.panel {
+  width: min(440px, 92vw);
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  background: white;
+  box-shadow: -12px 0 40px rgb(15 23 42 / 18%);
+}
+
+.header,
+.footer {
+  padding: 20px 22px;
+  border-color: #e6e9f0;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #e6e9f0;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.closeButton {
+  border: 0;
+  background: transparent;
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.content {
+  flex: 1;
+  padding: 22px;
+  overflow: auto;
+}
+
+.footer {
+  border-top: 1px solid #e6e9f0;
+}

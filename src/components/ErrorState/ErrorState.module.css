@@ -1,0 +1,23 @@
+.error {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 20px;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  color: #991b1b;
+  background: #fff1f2;
+}
+
+.error p {
+  margin: 4px 0 0;
+}
+
+.error button {
+  align-self: center;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  color: white;
+  background: #b42318;
+}
